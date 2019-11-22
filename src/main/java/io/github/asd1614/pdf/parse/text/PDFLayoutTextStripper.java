@@ -66,10 +66,17 @@ public class PDFLayoutTextStripper extends PDFTextStripper {
     private TextPosition previousTextPosition;
     private List<TextLine> textLineList;
 
+    private boolean sortLine = false;
+
     public PDFLayoutTextStripper() throws IOException {
         super();
         this.previousTextPosition = null;
         this.textLineList = new ArrayList<TextLine>();
+    }
+
+    public PDFLayoutTextStripper(boolean sortLine) throws IOException {
+        this();
+        this.sortLine = sortLine;
     }
 
     @Override
@@ -88,12 +95,14 @@ public class PDFLayoutTextStripper extends PDFTextStripper {
         List<List<TextPosition>> charactersByArticle = super.getCharactersByArticle();
         for( int i = 0; i < charactersByArticle.size(); i++) {
             List<TextPosition> textList = charactersByArticle.get(i);
-            /* 不排序 按原始顺序才能合并pdf的换行
-            try {
-                this.sortTextPositionList(textList);
-            } catch ( java.lang.IllegalArgumentException e) {
-                System.err.println(e);
-            }*/
+            // 不排序 按原始顺序才能合并pdf的换行
+            if (sortLine) {
+                try {
+                    this.sortTextPositionList(textList);
+                } catch ( java.lang.IllegalArgumentException e) {
+                    System.err.println(e);
+                }
+            }
             this.iterateThroughTextList(textList.iterator()) ;
         }
         this.writeToOutputStream(this.getTextLineList());

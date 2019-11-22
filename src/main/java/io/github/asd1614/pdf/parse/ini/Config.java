@@ -1,4 +1,22 @@
+/*
+ * Copyright 2019 asd1614
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.github.asd1614.pdf.parse.ini;
+
+import io.github.asd1614.pdf.parse.PDFMappingParser;
 
 import java.util.List;
 import java.util.Map;
@@ -22,16 +40,22 @@ public class Config {
     private Pattern border;
 
     /**
-     * 边界行数匹配 默认10
+     * border lines
+     * default 10
      */
     private Integer borderLines = 10;
     /**
-     * 正则表达式模式
+     * Match flags, a bit mask that may include
+     * {@link Pattern.CASE_INSENSITIVE}, {@link Pattern.MULTILINE}, {@link Pattern.DOTALL},
+     * {@link Pattern.UNICODE_CASE}, {@link Pattern.CANON_EQ}, {@link Pattern.UNIX_LINES},
+     * {@link Pattern.LITERAL}, {@link Pattern.UNICODE_CHARACTER_CLASS}
+     * and {@link Pattern.COMMENTS}
      */
     private Integer flags;
 
     /**
-     * 是否存入allList 默认true
+     * default true
+     * whether put to map with {@link PDFMappingParser.ALL_OBJ_KEY}
      */
     private Boolean inAll = Boolean.TRUE;
 

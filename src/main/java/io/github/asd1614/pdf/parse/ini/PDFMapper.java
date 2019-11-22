@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 asd1614
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.github.asd1614.pdf.parse.ini;
 
 import io.github.asd1614.pdf.parse.ini.Config.TYPE;
@@ -8,7 +24,6 @@ import org.ini4j.Profile.Section;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -18,7 +33,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
- * ini 配置文件读取 并按seq升序排序
+ * load ini file tool
+ * Maintained list of config according to ini order
  */
 public class PDFMapper {
 
@@ -61,7 +77,7 @@ public class PDFMapper {
         for (Map.Entry<String, Section> el : ini.entrySet()) {
             String key = el.getKey();
             if (key.contains("/")) {
-                // 子节点，不重复解析
+                // child config loading on parent parse
                 continue;
             }
             Section section = el.getValue();
@@ -71,17 +87,17 @@ public class PDFMapper {
             }
             config.setKey(key);
             if (config.getType() == TYPE.block) {
-                // 处理子节点
+                // loading block node and itself children
                 List<Config> childs = getChildSortList(config, section);
                 config.setChilds(childs);
             }
-            // 判断是否重置regex
+            // if flags is not null recomile regex with flags
             if (config.getFlags() != null) {
                 config.setRegex(Pattern.compile(config.getRegex().pattern(), config.getFlags()));
             }
             configs.add(config);
         }
-        // 按seq 升序排序
+        // sort list of config by seq
         Collections.sort(configs, new Comparator<Config>(){
             @Override
             public int compare(Config o1, Config o2) {
@@ -167,9 +183,10 @@ public class PDFMapper {
     }
 
     /**
-     * 加载子节点配置 只有type = block 才会进来
-     * @param parent  当前父节点
-     * @param section 当前父类的配置
+     * only type is block enter this method
+     * according block.childs load child node
+     * @param parent
+     * @param section
      * @return sort list by seq
      */
     private List<Config> getChildSortList(Config parent, Section section) {

@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 asd1614
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package io.github.asd1614.pdf.parse;
 
 import io.github.asd1614.pdf.parse.ini.Config;
@@ -34,7 +50,7 @@ public class PDFMappingParser {
     private Pattern map_key_pattern = Pattern.compile("([0-9a-zA-z]+)_([0-9a-zA-z]*)");
 
     /**
-     * 全部对象的key
+     * all object set key
      */
     public static final String ALL_OBJ_KEY = "all_object";
 
@@ -69,13 +85,13 @@ public class PDFMappingParser {
 
     public void parse(RandomAccess randomAccess) throws Exception{
         pdfToObjMap.clear();
-        // 从pdf 读取 全部文本
+        // parse pdf get then fulltext
         PDFParser pdfParser = new PDFParser(randomAccess);
         pdfParser.parse();
         PDDocument pdDocument = new PDDocument(pdfParser.getDocument());
         PDFTextStripper pdfTextStripper = new PDFLayoutTextStripper();
         String fullText = pdfTextStripper.getText(pdDocument);
-        // 按行拆分
+        // split newline char
         String[] splitLines = StringUtils.split(fullText, "\n");
         List<String> lines = Arrays.asList(splitLines);
 
@@ -99,7 +115,7 @@ public class PDFMappingParser {
             } else if (currentConfig.getType() == TYPE.list) {
                 String nextLine = k+1 < len ? lines.get(k+1) : null;
                 if (listParse(currentConfig, line, queue.peekFirst(), nextLine)) {
-                    // 到达表格尾行
+                    // end of table
                     currentConfig = queue.pollFirst();
                 }
             } else if (currentConfig.getType() == TYPE.ignore){
@@ -108,10 +124,10 @@ public class PDFMappingParser {
                 }
             } else if (currentConfig.getType() == TYPE.block) {
                 k = blockParse(currentConfig, lines, k, queue.peekFirst());
-                // 块处理 调用后，便进行下一个
+                // when block invoke end, poll new config from queue
                 currentConfig = queue.pollFirst();
             }
-            // 配置读取完毕
+            // queue is empty
             if (currentConfig == null) {
                 break;
             }
@@ -119,11 +135,11 @@ public class PDFMappingParser {
     }
 
     /**
-     * 解析目标行， 映射到对应的object上
-     * single 在解析的时，pdfToObjMap 中仅有一个对象
-     * @param config  当前配置
-     * @param line 当前pdf 行
-     * @return true 匹配成功
+     * parse text, mappiing to JavaBean
+     * single process
+     * @param config
+     * @param line text
+     * @return true matche
      */
     private boolean singleParse(Config config, String line) {
         boolean flag = false;
@@ -147,14 +163,12 @@ public class PDFMappingParser {
     }
 
     /**
-     * 解析目标行，映射到列表上
-     * list 在解析时， pdfToObjMap 中有一个list保存
-     * 每行一个列表元素
-     * @param config 当前配置
-     * @param line 当前行
-     * @param nextConfig  下一个配置
-     * @param nextLine  下一行
-     * @return true 表示当前行为尾行， false 表示当前行不是尾行
+     * type list process
+     * @param config
+     * @param line
+     * @param nextConfig
+     * @param nextLine
+     * @return end of table true
      */
     private boolean listParse(Config config, String line, Config nextConfig, String nextLine) {
 
@@ -184,7 +198,7 @@ public class PDFMappingParser {
     }
 
     /**
-     * 解析块 如果块匹配失败 返回原始状态
+     * type block process
      * @param blockConfig
      * @param lines
      * @param index
@@ -192,8 +206,8 @@ public class PDFMappingParser {
      * @return
      */
     private int blockParse(Config blockConfig, List<String> lines, int index, Config nextConfig) {
-        // 保存原始下标
-        int ogignalIndex = index;
+        // save original index
+        int originalIndex = index;
         if (blockConfig.getChilds() == null || blockConfig.getChilds().isEmpty()) {
             return --index ;
         }
@@ -210,7 +224,7 @@ public class PDFMappingParser {
             while (currentConfig != null && k < len) {
                 if (currentConfig.getType() == TYPE.single) {
                     StringBuffer text = new StringBuffer(lines.get(k));
-                    // 贪心多行匹配
+                    // possessive quantifiers
                     if (currentConfig.getFlags() != null && currentConfig.getFlags() == Pattern.MULTILINE) {
                         int j = k;
                         while(j < len && !currentConfig.getRegex().matcher(text.toString()).matches()) {
@@ -244,9 +258,9 @@ public class PDFMappingParser {
                     }
                 }
                 k++;
-                // 块边界检查
+                // block border check
                 if (checkBlockBorder(blockConfig, lines, k)) {
-                    // 未读完配置， 重置当前config
+                    // reset current index， poll new config
                     if (queue.peekFirst() != null) {
                         currentConfig = queue.pollFirst();
                         k = lastMatcheIndex;
@@ -255,7 +269,7 @@ public class PDFMappingParser {
                     }
                 }
             }
-            // 跳出循环判断
+            // break determine
             if (k+1 < len && nextConfig != null) {
                 breakFlag = nextConfig.getRegex().matcher(lines.get(k+1)).matches();
             }
@@ -270,11 +284,11 @@ public class PDFMappingParser {
             }
         }
 
-        return k >= len ? ogignalIndex : k;
+        return k >= len ? originalIndex : k;
     }
 
     /**
-     * 检查块边界
+     * check border
      * @param border
      * @param lines
      * @param index
@@ -311,9 +325,7 @@ public class PDFMappingParser {
     }
 
     /**
-     * single 时从 pdfToObjMap 获取已创建对象，为空则根据cls创建
-     * list 时从 pdfToObjMap 获取list 并创建对象 推入list中 list为空则创建LinkedList
-     * 其它情况直接创建对象 并推入 pdfToObjMap
+     * get object from pdfToObjMap, if is null, then according cls create new Object
      * @param key
      * @param type
      * @param cls
@@ -368,7 +380,7 @@ public class PDFMappingParser {
     }
 
     /**
-     * 保存所有映射的对象到一个列表中
+     * put all object into set
      * @param obj
      */
     private void setObjToAllList(Object obj) {
@@ -381,7 +393,7 @@ public class PDFMappingParser {
     }
 
     /**
-     * 返回所有解析到的对象集合
+     * return all object set
      * @return set
      */
     public Set getAllList() {
@@ -393,7 +405,7 @@ public class PDFMappingParser {
     }
 
     /**
-     * 执行取值表达式
+     * eval expression
      * @param expression
      * @param matcher
      * @return
@@ -408,7 +420,7 @@ public class PDFMappingParser {
     }
 
     /**
-     * 匹配目标行 如何匹配成功，返回true 忽略当前行
+     * type ignore process
      * @param config
      * @param line
      * @return
