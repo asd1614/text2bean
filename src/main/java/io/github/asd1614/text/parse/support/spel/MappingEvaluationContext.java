@@ -32,7 +32,6 @@ public class MappingEvaluationContext extends StandardEvaluationContext {
 
     public MappingEvaluationContext() {
         setRootObject(null);
-        this.addMethodResolver(new ParserMethodResolver());
         this.addPropertyAccessor(new ParserPropertyAccessor());
     }
 
