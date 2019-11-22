@@ -21,7 +21,6 @@ import io.github.asd1614.text.parse.ini.Config;
 import io.github.asd1614.text.parse.ini.Config.TYPE;
 import io.github.asd1614.text.parse.support.spel.MappingEvaluationContext;
 import io.github.asd1614.text.parse.support.spel.MatcherWrapper;
-import io.github.asd1614.pdf.parse.tools.ParserMethods;
 import io.github.asd1614.text.parse.tools.ReflectionUtils;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -59,7 +58,7 @@ public class StanderTextProcessor implements TextProcessor {
                     String fieldName = p.getKey();
                     String valExp = p.getValue();
                     String val = this.evalExpression(context, valExp, matcher);
-                    ReflectionUtils.invokeSetterMethod(obj, fieldName, val);
+                    invokeSetter(obj, fieldName, val);
                 }
                 this.setObjToAllList(context, obj);
             }
@@ -92,7 +91,7 @@ public class StanderTextProcessor implements TextProcessor {
                     String fieldName = p.getKey();
                     String valExp = p.getValue();
                     String val = this.evalExpression(context, valExp, matcher);
-                    ReflectionUtils.invokeSetterMethod(obj, fieldName, val);
+                    invokeSetter(obj, fieldName, val);
                 }
                 if (config.getInAll()) {
                     this.setObjToAllList(context, obj);
@@ -147,7 +146,7 @@ public class StanderTextProcessor implements TextProcessor {
                                 String fieldName = p.getKey();
                                 String valExp = p.getValue();
                                 String val = this.evalExpression(context, valExp, matcher);
-                                ReflectionUtils.invokeSetterMethod(obj, fieldName, val);
+                                invokeSetter(obj, fieldName, val);
                             }
                         }
                         currentConfig = queue.pollFirst();
@@ -217,6 +216,21 @@ public class StanderTextProcessor implements TextProcessor {
         Expression exp = spelParser.parseExpression(expression);
         String val = exp.getValue(context, wrapper, String.class);
         return val;
+    }
+
+    /**
+     * set val to object, even if target is a map
+     * @param target
+     * @param name
+     * @param val
+     */
+    private void invokeSetter(Object target, String name, Object val) {
+        if (target instanceof Map) {
+            Map map = (Map) target;
+            map.put(name, val);
+        } else {
+            ReflectionUtils.invokeSetterMethod(target, name, val);
+        }
     }
 
     /**

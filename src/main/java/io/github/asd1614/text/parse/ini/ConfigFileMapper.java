@@ -120,6 +120,9 @@ public class ConfigFileMapper {
                 if (StringUtils.isBlank(className)) {
                     continue;
                 }
+                if (className.equals("map") || className.equals(Map.class.getName())) {
+                    className = java.util.HashMap.class.getName();
+                }
                 Class<?> cls = null;
                 try {
                     cls = Class.forName(className);
