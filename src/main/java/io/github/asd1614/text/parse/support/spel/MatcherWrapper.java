@@ -60,9 +60,8 @@ public class MatcherWrapper {
 
     /**
      * remove space string
-     * @param matcher
      * @param expression  matcher group index
-     * @return
+     * @return string
      */
     public String trim(String expression) {
         if (matches) {
@@ -74,9 +73,8 @@ public class MatcherWrapper {
 
     /**
      * remove surplus space string, save only one space
-     * @param matcher
      * @param expression matcher group index
-     * @return
+     * @return string
      */
     public String surplus(String expression) {
         if (matches) {
@@ -95,7 +93,7 @@ public class MatcherWrapper {
     /**
      * null safe
      * @param exp
-     * @return
+     * @return string
      */
     private String getGroupVal(String exp) {
         String group = ParserPropertyAccessor.checkName(exp);
