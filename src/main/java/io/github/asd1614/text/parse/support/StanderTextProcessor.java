@@ -283,11 +283,7 @@ public class StanderTextProcessor implements TextProcessor {
         if (TYPE.single == TYPE.get(type)) {
             T t = (T) context.getDataPool().get(newKey, type);
             if (t == null) {
-                try {
-                    t = cls.newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException(e.getMessage(), e );
-                }
+                t = newInstanceByClass(cls);
                 if (addToMap) {
                     this.setObject(context, newKey, type, t);
                 }
@@ -299,25 +295,26 @@ public class StanderTextProcessor implements TextProcessor {
                 list = new LinkedList();
                 setObject(context, newKey, type, list);
             }
-            try {
-                T t = cls.newInstance();
-                if (addToMap) {
-                    list.add(t);
-                }
-                return t;
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage(), e );
+            T t = newInstanceByClass(cls);
+            if (addToMap) {
+                list.add(t);
             }
+            return t;
         } else {
-            try {
-                T t = cls.newInstance();
-                if (addToMap) {
-                    setObject(context, newKey, type, t);
-                }
-                return t;
-            } catch (Exception e) {
-                throw new RuntimeException(e.getMessage(), e );
+            T t = newInstanceByClass(cls);
+            if (addToMap) {
+                setObject(context, newKey, type, t);
             }
+            return t;
+        }
+    }
+
+    private <T> T newInstanceByClass(Class<T> cls) {
+        try {
+            T t = cls.newInstance();
+            return t;
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage(), e );
         }
     }
 
