@@ -28,8 +28,6 @@ import java.util.List;
 
 public class MappingEvaluationContext extends StandardEvaluationContext {
 
-    static final Log log = LogFactory.getLog(MappingEvaluationContext.class);
-
     public MappingEvaluationContext() {
         setRootObject(null);
         this.addPropertyAccessor(new ParserPropertyAccessor());
@@ -39,13 +37,6 @@ public class MappingEvaluationContext extends StandardEvaluationContext {
         super();
         setRootObject(rootObject);
     }
-
-    @Override
-    public Object lookupVariable(String name) {
-        log.debug("lookup variable name is " + name);
-        return super.lookupVariable(name);
-    }
-
 
     public Config getCurrentConfig() {
         return (Config) super.lookupVariable(TextProcessor.CURRENT_CONFIG);

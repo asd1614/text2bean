@@ -25,6 +25,12 @@
         </license>
     </licenses>
 
+    <scm>
+        <connection>scm:git:git://github.com/asd1614/text2bean.git</connection>
+        <developerConnection>scm:git:ssh://github.com:asd1614/text2bean.git</developerConnection>
+        <url>https://github.com/asd1614/text2bean/tree/master</url>
+    </scm>
+
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
