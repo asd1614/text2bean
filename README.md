@@ -30,3 +30,14 @@ Conversion result
 ``` 
 
 More detail see the [PdfParseTest.java](src/test/java/example/PdfParseTest.java) 
+
+## How to use
+
+### Maven
+```
+<dependency>
+    <groupId>io.github.asd1614</groupId>
+    <artifactId>text2bean</artifactId>
+    <version>0.1.0</version>
+</dependency>
+```
